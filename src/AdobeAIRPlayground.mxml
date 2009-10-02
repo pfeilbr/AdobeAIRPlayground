@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="400" height="400" applicationComplete="appInit()">
+
+<mx:Script>
+	<![CDATA[
+	
+	import mx.core.Application;
+	import flash.filesystem.*;
+	import flash.data.*;
+	
+	import com.adobe.serialization.json.*;
+
+	private function appInit():void {
+	
+	}
+	
+	private function readFile(path:String):String {
+		var content:String = "";
+		
+		var f:File = new File(path);
+		var fs:FileStream =  new FileStream();
+		fs.open(f, FileMode.READ);
+		while(fs.bytesAvailable) {
+			content += fs.readUTFBytes(fs.bytesAvailable);
+		}
+		return content;
+	}
+	
+	private function loadFile():void {
+		fileContents.text = readFile(filePath.text);
+	}
+	
+	private function executeDBCommand():void {
+		var dbFile:File = new File(dbPath.text);
+		var sqlConn:SQLConnection = new SQLConnection();
+		var sqlStatement:SQLStatement = new SQLStatement();
+		
+		sqlConn.open(dbFile);
+		sqlStatement.sqlConnection = sqlConn;
+		sqlStatement.text = dbSQLCommand.text;
+		sqlStatement.execute();
+		var result:Array = sqlStatement.getResult().data;
+		
+		var jsonEncoder:JSONEncoder = new JSONEncoder(result);
+		dbResults.text = jsonEncoder.getString();
+		
+		sqlConn.close();
+	}
+		
+	]]>
+</mx:Script>
+	<mx:TabNavigator left="0" top="0" bottom="0" right="0">
+		<mx:Canvas label="File" width="100%" height="100%">
+			<mx:TextInput right="71" height="22" top="10" left="76" minWidth="200" id="filePath" text="/cplibs.sh"/>
+			<mx:Button y="10" label="Load" right="10" click="loadFile()"/>
+			<mx:Label text="File Path:" top="12" left="10"/>
+			<mx:TextArea id="fileContents" top="38" bottom="10" left="10" right="10"/>
+		</mx:Canvas>
+		<mx:Canvas label="Directory" width="100%" height="100%">
+		</mx:Canvas>
+		<mx:Canvas label="SQLite" width="100%" height="100%">
+			<mx:TextInput right="90" height="22" top="10" left="76" minWidth="200" id="dbPath" text="/Users/brianpfeil/Temp/a.sqlite"/>
+			<mx:Button y="10" label="Execute" right="10" click="executeDBCommand()"/>
+			<mx:Label text="DB Path:" top="12" left="10"/>
+			<mx:HRule right="10" left="10" top="38"/>
+			<mx:Label text="SQL Command:" top="48" left="10"/>
+			<mx:Label text="Results:" left="13" verticalCenter="18"/>
+			<mx:TextArea id="dbSQLCommand" top="74" left="10" right="10" bottom="181" text="select * from person"/>
+			<mx:TextArea id="dbResults" left="10" right="10" bottom="26" height="121"/>
+		</mx:Canvas>		
+	</mx:TabNavigator>
+	
+</mx:WindowedApplication>
