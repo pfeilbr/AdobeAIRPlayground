@@ -45,6 +45,38 @@
 		
 		sqlConn.close();
 	}
+	
+	private function ls(path:String):Array {
+		var resultFiles:Array = new Array();
+
+		var dir:File = new File(path);
+		var files:Array = dir.getDirectoryListing();
+		
+		var s:String = "";
+		
+		for each(var f:File in files) {
+			if (f.isDirectory) {
+				resultFiles = resultFiles.concat( ls(f.nativePath) );		
+			} else {
+				resultFiles.push(f.nativePath);
+			}
+			s += f.nativePath + "\n";
+		}
+		
+		return resultFiles;
+	}
+	
+	private function displayDirectoryListing(event:Event):void {
+		var paths:Array = ls(directoryPathTextInput.text);
+		
+		var s:String = "";
+		
+		for each(var path:String in paths) {
+			s += path + "\n";
+		}
+		
+		directoryListTextArea.text = s;
+	}
 		
 	]]>
 </mx:Script>
@@ -62,6 +94,17 @@
 			<mx:TextArea id="fileContents" top="38" bottom="10" left="10" right="10"/>
 		</mx:Canvas>
 		<mx:Canvas label="Directory" width="100%" height="100%" showEffect="{navigateEffectStart}" hideEffect="{navigateEffectEnd}">
+			<mx:VBox width="100%" height="100%">
+							
+				<mx:HBox width="100%">
+					<mx:Label text="Directory Path:" />
+					<mx:TextInput id="directoryPathTextInput" text="/Users/brianpfeil/Temp/macruby_latest" />
+					<mx:Button label="List Files" click="displayDirectoryListing(event)" />
+				</mx:HBox>
+			
+				<mx:TextArea id="directoryListTextArea" width="100%" height="100%"/>
+			</mx:VBox>
+			
 		</mx:Canvas>
 	<mx:Canvas label="SQLite" width="100%" height="100%" showEffect="{navigateEffectStart}" hideEffect="{navigateEffectEnd}">
 			<mx:TextInput right="90" height="22" top="10" left="76" minWidth="200" id="dbPath" text="/Users/brianpfeil/Temp/a.sqlite"/>
